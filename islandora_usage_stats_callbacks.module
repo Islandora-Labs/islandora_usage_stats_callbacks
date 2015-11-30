@@ -5,8 +5,20 @@
  */
 function islandora_usage_stats_callbacks_menu() {
 
-  $menu['islandora_usage_stats_callbacks/object_log/%'] = array (
-    'page callback' => 'get_object_log',
+  $menu['islandora_usage_stats_callbacks/object_report/%'] = array (
+    'page callback' => 'get_object_report',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+  );
+ 
+  $menu['islandora_usage_stats_callbacks/total_views/%'] = array (
+    'page callback' => 'get_total_views',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+  );
+  
+  $menu['islandora_usage_stats_callbacks/total_downloads/%'] = array (
+    'page callback' => 'get_total_downloads',
     'page arguments' => array(2),
     'access callback' => TRUE,
   );
@@ -14,20 +26,35 @@ function islandora_usage_stats_callbacks_menu() {
   return $menu;
 }
 
-function get_object_log($pid) {
+/**
+ * Callback functions
+ */
+function get_object_report($pid) {
+  $report = array();
   $ids = get_object_ids($pid);
-  print_r($ids);
-  print("<hr/>");
-  $total_views = get_aggregate_total_views($ids);
-  print("Total Views: ${total_views}");
-  print("<hr/>");
-  print("Granular views: \n");
-  //print_r(get_granular_object_views($ids));
-  echo json_encode(get_granular_object_views($ids));
-  print("<hr/>");
-
+  $report['pid'] = $ids['pid'];
+  $report['cmodel'] = $ids['cmodel'];
+  $report['views'] = get_granular_object_views($ids);
+  $report['downloads'] = get_granular_object_downloads($ids);
+  echo json_encode($report);
   drupal_exit();
 }
+
+function get_total_views($pid) {
+  $ids = get_object_ids($pid);
+  echo get_aggregate_object_views($ids);
+  drupal_exit();
+}
+
+function get_total_downloads($pid) {
+  $ids = get_object_ids($pid);
+  echo get_aggregate_object_downloads($ids);
+  drupal_exit();
+}
+
+/**
+ * DB parsing helper functions
+ */
 
 function get_usage_stats_id_via_pid($pid) {
   $query = "SELECT id FROM islandora_usage_stats_objects WHERE pid='${pid}'";
@@ -44,12 +71,11 @@ function get_object_ids($pid) {
 }
 
 function get_object_views($ids) {
-  $usid = $ids['usid'];
-  $query = "SELECT time, ip FROM islandora_usage_stats_object_access_log WHERE pid_id=${usid}";
+  $query = "SELECT time, ip FROM islandora_usage_stats_object_access_log WHERE pid_id=${ids['usid']}";
   return db_query($query);
 }
 
-function get_aggregate_total_views($ids) {
+function get_aggregate_object_views($ids) {
   return get_object_views($ids)->rowCount();
 }
 
@@ -58,7 +84,27 @@ function get_granular_object_views($ids) {
 }
 
 function get_object_downloads($ids) {
+  switch ($ids['cmodel']) {
+    case 'ir:citationCModel':
+        $dsid = 'PDF';
+        break;
+    case 'ir:thesisCModel':
+        $dsid = 'PDF';
+        break;
+    case 'islandora:sp_pdf':
+        $dsid = 'OBJ';
+        break;
+    }
+  $query = "SELECT id FROM islandora_usage_stats_datastreams WHERE pid_id=${ids['usid']} AND dsid='${dsid}'";
+  $usdsid = db_query($query)->fetchAssoc()['id'];
+  $query = "SELECT time, ip FROM islandora_usage_stats_object_ds_access_log where ds_id=${usdsid}"; 
+  return db_query($query);
 }
-  
 
+function get_aggregate_object_downloads($ids) {
+  return get_object_downloads($ids)->rowCount();
+}
 
+function get_granular_object_downloads($ids) {
+  return get_object_downloads($ids)->fetchAll();
+}
