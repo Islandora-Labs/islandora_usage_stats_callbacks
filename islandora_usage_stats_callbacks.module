@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_usage_stats_callbacks_menu() {
+
+  $menu['islandora_usage_stats_callbacks/object_log/%/%'] = array (
+    'page callback' => 'islandora_usage_stats_callbacks_object_log',
+    'page arguments' => array(1,2),
+    'access callback' => TRUE,
+  );
+  
+  return $menu;
+}
+
+function islandora_usage_stats_callbacks_object_log($pid, $format) {
+  print "You asked for ${pid} in ${format} format";
+  drupal_exit();
+}
