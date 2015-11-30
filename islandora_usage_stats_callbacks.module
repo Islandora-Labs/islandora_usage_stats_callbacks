@@ -5,16 +5,60 @@
  */
 function islandora_usage_stats_callbacks_menu() {
 
-  $menu['islandora_usage_stats_callbacks/object_log/%/%'] = array (
-    'page callback' => 'islandora_usage_stats_callbacks_object_log',
-    'page arguments' => array(1,2),
+  $menu['islandora_usage_stats_callbacks/object_log/%'] = array (
+    'page callback' => 'get_object_log',
+    'page arguments' => array(2),
     'access callback' => TRUE,
   );
   
   return $menu;
 }
 
-function islandora_usage_stats_callbacks_object_log($pid, $format) {
-  print "You asked for ${pid} in ${format} format";
+function get_object_log($pid) {
+  $ids = get_object_ids($pid);
+  print_r($ids);
+  print("<hr/>");
+  $total_views = get_aggregate_total_views($ids);
+  print("Total Views: ${total_views}");
+  print("<hr/>");
+  print("Granular views: \n");
+  //print_r(get_granular_object_views($ids));
+  echo json_encode(get_granular_object_views($ids));
+  print("<hr/>");
+
   drupal_exit();
 }
+
+function get_usage_stats_id_via_pid($pid) {
+  $query = "SELECT id FROM islandora_usage_stats_objects WHERE pid='${pid}'";
+  $results = db_query($query)->fetchAssoc();
+  return $results['id'];
+}
+
+function get_object_ids($pid) {
+  $ids = array();
+  $ids['pid'] = $pid;
+  $ids['usid'] = get_usage_stats_id_via_pid($pid);
+  $ids['cmodel'] = islandora_object_load($pid)->models[0];
+  return $ids;
+}
+
+function get_object_views($ids) {
+  $usid = $ids['usid'];
+  $query = "SELECT time, ip FROM islandora_usage_stats_object_access_log WHERE pid_id=${usid}";
+  return db_query($query);
+}
+
+function get_aggregate_total_views($ids) {
+  return get_object_views($ids)->rowCount();
+}
+
+function get_granular_object_views($ids) {
+  return get_object_views($ids)->fetchAll();
+}
+
+function get_object_downloads($ids) {
+}
+  
+
+
