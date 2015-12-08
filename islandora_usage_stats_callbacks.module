@@ -47,7 +47,8 @@ function get_object_ids($pid) {
     drupal_exit();
   }
   $ids['dsid'] = $cmodel_dsids[$ids['cmodel']];
-  $ids['usid'] = db_query("SELECT id FROM islandora_usage_stats_objects WHERE pid='${pid}'")->fetchAssoc()['id'];
+  $result = db_query("SELECT id FROM islandora_usage_stats_objects WHERE pid='${pid}'")->fetchAssoc();
+  $ids['usid'] = $result['id'];
   if ($ids['usid'] == '') {
     echo json_encode(array('pid' => $ids['pid'], 'cmodel' => $ids['cmodel'], 'views' => array(), 'downloads' => array()));
     drupal_exit();
@@ -63,7 +64,8 @@ function get_object_views($ids) {
 
 function get_object_downloads($ids) {
   $query = "SELECT id FROM islandora_usage_stats_datastreams WHERE pid_id=${ids['usid']} AND dsid='${ids['dsid']}'";
-  $usdsid = db_query($query)->fetchAssoc()['id'];
+  $result = db_query($query)->fetchAssoc();
+  $usdsid = $result['id'];
   if ($usdsid == '') {
     return array();
   }
