@@ -5,7 +5,7 @@
  */
 function islandora_usage_stats_callbacks_menu() {
   $menu['islandora_usage_stats_callbacks/object_stats/%'] = array (
-    'page callback' => 'get_object_stats',
+    'page callback' => 'islandora_usage_stats_callbacks_get_object_stats',
     'page arguments' => array(2),
     'access callback' => TRUE,
   );
@@ -16,13 +16,13 @@ function islandora_usage_stats_callbacks_menu() {
 /**
  * Callback functions
  */
-function get_object_stats($pid) {
+function islandora_usage_stats_callbacks_get_object_stats($pid) {
   $report = array();
-  $ids = get_object_ids($pid);
+  $ids = islandora_usage_stats_callbacks_get_object_ids($pid);
   $report['pid'] = $ids['pid'];
   $report['cmodel'] = $ids['cmodel'];
-  $report['views'] = get_object_views($ids);
-  $report['downloads'] = get_object_downloads($ids);
+  $report['views'] = islandora_usage_stats_callbacks_get_object_views($ids);
+  $report['downloads'] = islandora_usage_stats_callbacks_get_object_downloads($ids);
   echo json_encode($report);
   drupal_exit();
 }
@@ -31,7 +31,7 @@ function get_object_stats($pid) {
 /**
  * DB parsing helper functions
  */
-function get_object_ids($pid) {
+function islandora_usage_stats_callbacks_get_object_ids($pid) {
   $ids = array();
   $ids['pid'] = $pid;
   $ids['cmodel'] = islandora_object_load($pid)->models[0];
@@ -60,7 +60,7 @@ function get_object_ids($pid) {
   return $ids;
 }
 
-function get_object_views($ids) {
+function islandora_usage_stats_callbacks_get_object_views($ids) {
   $result = db_select('islandora_usage_stats_object_access_log')
     ->fields('islandora_usage_stats_object_access_log', array('time', 'ip'))
     ->condition('pid_id', $ids['usid'])
@@ -69,7 +69,7 @@ function get_object_views($ids) {
   return $record;
 }
 
-function get_object_downloads($ids) {
+function islandora_usage_stats_callbacks_get_object_downloads($ids) {
   $result = db_select('islandora_usage_stats_datastreams')
     ->fields('islandora_usage_stats_datastreams', array('id'))
     ->condition('pid_id', $ids['usid'])
@@ -81,8 +81,6 @@ function get_object_downloads($ids) {
     return array();
   }
   else {
-
-    //$query = "SELECT time, ip FROM islandora_usage_stats_object_ds_access_log where ds_id=${usdsid}"; 
     $result = db_select('islandora_usage_stats_object_ds_access_log')
       ->fields('islandora_usage_stats_object_ds_access_log', array('time', 'ip'))
       ->condition('ds_id', $ids['usdsid'])
