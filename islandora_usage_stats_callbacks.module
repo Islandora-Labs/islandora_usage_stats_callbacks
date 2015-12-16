@@ -21,6 +21,7 @@ function islandora_usage_stats_callbacks_get_object_stats($pid) {
   $ids = islandora_usage_stats_callbacks_get_object_ids($pid);
   $report['pid'] = $ids['pid'];
   $report['cmodel'] = $ids['cmodel'];
+  $report['usid'] = $ids['usid'];
   $report['views'] = islandora_usage_stats_callbacks_get_object_views($ids);
   $report['downloads'] = islandora_usage_stats_callbacks_get_object_downloads($ids);
   echo json_encode($report);
@@ -65,27 +66,26 @@ function islandora_usage_stats_callbacks_get_object_views($ids) {
     ->fields('islandora_usage_stats_object_access_log', array('time', 'ip'))
     ->condition('pid_id', $ids['usid'])
     ->execute();
-  $record = $result->fetchAssoc();
+  $record = $result->fetchAll();
   return $record;
 }
 
 function islandora_usage_stats_callbacks_get_object_downloads($ids) {
-  $result = db_select('islandora_usage_stats_datastreams')
+  $ds_check_query = db_select('islandora_usage_stats_datastreams')
     ->fields('islandora_usage_stats_datastreams', array('id'))
     ->condition('pid_id', $ids['usid'])
     ->condition('dsid', $ids['dsid'])
     ->execute();
-  $record = $result->fetchAssoc();
-  $usdsid = $record['id'];
-  if ($usdsid == '') {
-    return array();
-  }
-  else {
+  $ds_check_result = $ds_check_query->fetchAssoc();
+  if ($ds_check_result['id']) {
     $result = db_select('islandora_usage_stats_object_ds_access_log')
       ->fields('islandora_usage_stats_object_ds_access_log', array('time', 'ip'))
-      ->condition('ds_id', $ids['usdsid'])
+      ->condition('ds_id', $ds_check_result['id'])
       ->execute();
-    $record = $result->fetchAssoc();
+    $record = $result->fetchAll();
     return $record;
+  }
+  else {
+    return array();
   }
 }
