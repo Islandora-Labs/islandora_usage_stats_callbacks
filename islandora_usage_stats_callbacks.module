@@ -21,7 +21,6 @@ function islandora_usage_stats_callbacks_get_object_stats($pid) {
   $ids = islandora_usage_stats_callbacks_get_object_ids($pid);
   $report['pid'] = $ids['pid'];
   $report['cmodel'] = $ids['cmodel'];
-  $report['usid'] = $ids['usid'];
   $report['views'] = islandora_usage_stats_callbacks_get_object_views($ids);
   $report['downloads'] = islandora_usage_stats_callbacks_get_object_downloads($ids);
   echo json_encode($report);
