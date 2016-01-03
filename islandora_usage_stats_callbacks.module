@@ -33,6 +33,14 @@ function islandora_usage_stats_callbacks_get_object_stats($pid) {
  * DB parsing helper functions
  */
 function islandora_usage_stats_callbacks_get_object_ids($pid) {
+
+  # Check PID string format before proceeding 
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  if (!islandora_is_valid_pid($pid)) {
+    echo json_encode(array('error' => "PID '${pid}' is not a valid PID string")); 
+    drupal_exit();
+  }
+
   $ids = array();
   $ids['pid'] = $pid;
   $ids['cmodel'] = islandora_object_load($pid)->models[0];
@@ -40,7 +48,7 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
                         'ir:thesisCModel' => 'PDF', 
                         'islandora:sp_pdf' => 'OBJ');
   if ($ids['cmodel'] == '') {
-    echo json_encode(array('error' => "invalid PID '${ids['pid']}'")); 
+    echo json_encode(array('error' => "PID '${ids['pid']}' does not exist")); 
     drupal_exit();
   }
   elseif (!in_array($ids['cmodel'], array_keys($cmodel_dsids))) {
