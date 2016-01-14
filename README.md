@@ -1,5 +1,5 @@
 # islandora_usage_stats_callbacks
-**Helper module for exposing islandora_usage_stats data**
+*Helper module for exposing islandora_usage_stats data*
 
 ## Description
 Islandora Usage Stats Callbacks is a helper module that uses the data collected by the Islandora Usage Stats and exposes it via URL callbacks.
