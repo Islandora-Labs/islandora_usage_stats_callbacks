@@ -20,14 +20,47 @@ function islandora_usage_stats_callbacks_menu() {
 function islandora_usage_stats_callbacks_get_object_stats($pid) {
   $report = array();
   $ids = islandora_usage_stats_callbacks_get_object_ids($pid);
+  $legacy_stats = islandora_usage_stats_callbacks_get_legacy_stats($pid);
   $report['pid'] = $ids['pid'];
   $report['cmodel'] = $ids['cmodel'];
+  $report['legacy-views'] = $legacy_stats['views'];
+  $report['legacy-downloads'] = $legacy_stats['downloads'];
   $report['views'] = islandora_usage_stats_callbacks_get_object_views($ids);
   $report['downloads'] = islandora_usage_stats_callbacks_get_object_downloads($ids);
   echo json_encode($report);
   drupal_exit();
 }
 
+/**
+ * Legacy stats reader
+ */
+function islandora_usage_stats_callbacks_get_legacy_stats($pid) {
+  $legacy_stats = array();
+  $legacy_stats_file_loc = $_SERVER['DOCUMENT_ROOT'] . "/" . drupal_get_path('module', 'islandora_usage_stats_callbacks') . "/legacy-stats.csv";
+  if (file_exists($legacy_stats_file_loc)) {
+    $legacy_data = array();
+    $legacy_data_csv = array_map('str_getcsv', file($legacy_stats_file_loc));
+    foreach ($legacy_data_csv as $row) {
+      $legacy_pid = $row[0];
+      $legacy_views = $row[1];
+      $legacy_downloads = $row[2];
+      $legacy_data[$legacy_pid] = array("legacy-views" => $legacy_views, "legacy-downloads" => $legacy_downloads);
+    }
+    if (array_key_exists($pid, $legacy_data)) {
+      $legacy_stats['views'] = $legacy_data[$pid]['legacy-views'];
+      $legacy_stats['downloads'] = $legacy_data[$pid]['legacy-downloads']; 
+    }
+    else {
+      $legacy_stats['views'] = 0;
+      $legacy_stats['downloads'] = 0;
+    }
+  }
+  else {
+    $legacy_stats['views'] = 0;
+    $legacy_stats['downloads'] = 0;
+  }
+  return $legacy_stats;
+}
 
 /**
  * DB parsing helper functions
