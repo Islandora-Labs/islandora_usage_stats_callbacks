@@ -47,8 +47,8 @@ function islandora_usage_stats_callbacks_get_legacy_stats($pid) {
       $legacy_data[$legacy_pid] = array("legacy-views" => $legacy_views, "legacy-downloads" => $legacy_downloads);
     }
     if (array_key_exists($pid, $legacy_data)) {
-      $legacy_stats['views'] = $legacy_data[$pid]['legacy-views'];
-      $legacy_stats['downloads'] = $legacy_data[$pid]['legacy-downloads']; 
+      $legacy_stats['views'] = intval($legacy_data[$pid]['legacy-views']);
+      $legacy_stats['downloads'] = intval($legacy_data[$pid]['legacy-downloads']); 
     }
     else {
       $legacy_stats['views'] = 0;
