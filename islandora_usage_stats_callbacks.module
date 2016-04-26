@@ -5,12 +5,36 @@
  * Implements hook_menu().
  */
 function islandora_usage_stats_callbacks_menu() {
-  $menu['islandora_usage_stats_callbacks/object_stats/%'] = array (
+  $items = array();
+
+  $items['islandora_usage_stats_callbacks/object_stats/%'] = array (
     'page callback' => 'islandora_usage_stats_callbacks_get_object_stats',
     'page arguments' => array(2),
     'access callback' => TRUE,
   );
-  return $menu;
+
+  $items['admin/islandora/tools/islandora_usage_stats_callbacks'] = array(
+    'title' => 'Islandora Usage Stats Callbacks Settings',
+    'description' => 'Change behavior of Islandora Usage Stats Callbacks.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_usage_stats_callbacks_admin_form'),
+    'access arguments' => array('manage usage stats callbacks'),
+    'file' => 'includes/admin.form.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function islandora_usage_stats_callbacks_permission() {
+  return array(
+    'manage usage stats callbacks' => array(
+      'title' => 'Manage usage stats callbacks configuration',
+      'description' => 'Manage the configuration of the Usage Stats Callbacks module',
+    ),
+  );
 }
 
 
@@ -36,8 +60,9 @@ function islandora_usage_stats_callbacks_get_object_stats($pid) {
  */
 function islandora_usage_stats_callbacks_get_legacy_stats($pid) {
   $legacy_stats = array();
-  $legacy_stats_file_loc = $_SERVER['DOCUMENT_ROOT'] . "/" . drupal_get_path('module', 'islandora_usage_stats_callbacks') . "/legacy-stats.csv";
-  if (file_exists($legacy_stats_file_loc)) {
+  //$legacy_stats_file_loc = $_SERVER['DOCUMENT_ROOT'] . "/" . drupal_get_path('module', 'islandora_usage_stats_callbacks') . "/legacy-stats.csv";
+  $legacy_stats_file_loc = variable_get('islandora_usage_stats_callbacks_legacy_stats_file_location', ''); 
+  if (($legacy_stats_file_loc != '') && file_exists($legacy_stats_file_loc)) {
     $legacy_data = array();
     $legacy_data_csv = array_map('str_getcsv', file($legacy_stats_file_loc));
     foreach ($legacy_data_csv as $row) {

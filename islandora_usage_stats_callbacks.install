@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install/uninstall hooks.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function islandora_usage_stats_uninstall() {
+  variable_del('islandora_usage_stats_callbacks_legacy_stats_file_location');
+}
