@@ -129,7 +129,9 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
 
 function islandora_usage_stats_callbacks_get_object_views($ids) {
   $result = db_select('islandora_usage_stats_object_access_log')
-    ->fields('islandora_usage_stats_object_access_log', array('time', 'ip'))
+    # IP address temporarily disabled for security reasons
+    #->fields('islandora_usage_stats_object_access_log', array('time', 'ip'))
+    ->fields('islandora_usage_stats_object_access_log', array('time'))
     ->condition('pid_id', $ids['usid'])
     ->execute();
   $record = $result->fetchAll();
@@ -145,7 +147,9 @@ function islandora_usage_stats_callbacks_get_object_downloads($ids) {
   $ds_check_result = $ds_check_query->fetchAssoc();
   if ($ds_check_result['id']) {
     $result = db_select('islandora_usage_stats_object_ds_access_log')
-      ->fields('islandora_usage_stats_object_ds_access_log', array('time', 'ip'))
+      # IP address temporarily disabled for security reasons
+      #->fields('islandora_usage_stats_object_ds_access_log', array('time', 'ip'))
+      ->fields('islandora_usage_stats_object_ds_access_log', array('time'))
       ->condition('ds_id', $ds_check_result['id'])
       ->execute();
     $record = $result->fetchAll();
