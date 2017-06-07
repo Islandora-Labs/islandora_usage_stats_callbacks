@@ -106,7 +106,11 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
                         'ir:thesisCModel' => 'PDF',
                         'islandora:sp_pdf' => 'OBJ',
                         'islandora:sp_basic_image' => 'OBJ',
-                        'islandora:sp_large_image_cmodel' => 'OBJ');
+                        'islandora:sp_large_image_cmodel' => 'OBJ',
+                        'islandora:compoundCModel' => NULL,
+                        'islandora:newspaperCModel' => NULL,
+                        'islandora:newspaperIssueCModel' => NULL,
+                        'islandora:newspaperPageCModel' => 'OBJ');
   if ($ids['cmodel'] == '') {
     echo json_encode(array('error' => "PID '${ids['pid']}' does not exist")); 
     drupal_exit();
