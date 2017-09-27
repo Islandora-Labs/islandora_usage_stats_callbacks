@@ -119,7 +119,7 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
                         'islandora:pageCModel' => 'OBJ',
                         'islandora:bookCModel' => 'PDF',
                         'islandora:newspaperCModel' => 'PDF');
- 
+print_r($cmodel_dsids); 
   if ($ids['cmodel'] == '') {
     echo json_encode(array('error' => "PID '${ids['pid']}' does not exist")); 
     drupal_exit();
