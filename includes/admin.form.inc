@@ -23,6 +23,28 @@ function islandora_usage_stats_callbacks_admin_form() {
     '#default_value' => variable_get('islandora_usage_stats_callbacks_legacy_stats_file_location', ''),
   );
 
+/* This is for later
+  $all_cmodels = islandora_get_content_models();
+*/ 
+
+  $form['content_model_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configure which DSID downloads will be tracked.'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  module_load_include('inc', 'islandora_usage_stats_callbacks', 'includes/utilities');
+  $default_dsids = islandora_usage_stats_callbacks_set_default_dsids();
+  $form['content_model_wrapper']['islandora_usage_stats_callbacks_cmodel_dsids'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Download DSIDs to track'),
+    '#rows' => 10,
+    '#default_value' => variable_get('islandora_usage_stats_callbacks_cmodel_dsids', $default_dsids),
+    '#description' => t("Place each CModel and DSID pair, separated by a |, on its own line. Enter FALSE for CModels with no downloadable datastreams."),
+  );
+
+
   $form['save_configuration'] = array(
     '#type' => 'submit',
     '#name' => 'saveConfiguration',
