@@ -106,9 +106,9 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
   $cmodel_dsids = array();
 
   // Convert configured DSIDs into an array
-  foreach(explode('\n',$dsids) as $pair){
-    $x=explode('|',$pair);
-    $cmodel_dsids[$x[0]]=$x[1];
+  foreach (explode('\n', $dsids) as $pair) {
+    $dsid = explode('|', $pair);
+    $cmodel_dsids[$dsid[0]] = $dsid[1];
   }
 
   if ($ids['cmodel'] == '') {
