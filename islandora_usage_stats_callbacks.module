@@ -102,7 +102,11 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
   $ids = array();
   $ids['pid'] = $pid;
   $ids['cmodel'] = islandora_object_load($pid)->models[0];
-  $dsids = variable_get(islandora_usage_stats_callbacks_cmodel_dsids,'ir:citationCModel|PDF\nir:thesisCModel|PDF\nislandora:sp_pdf|OBJ\nislandora:sp_basic_image|OBJ\nislandora:sp_large_image_cmodel|OBJ\nislandora:binaryObjectCModel|OBJnislandora:sp_videoCModel|MP4\nislandora:sp-audioCModel|PROXY_MP3nislandora:collectionCModel|FALSE\nislandora:compoundCModel|FALSE\nislandora:newspaperIssueCModel|PDF\nislandora:newspaperPageCModel|OBJ\nislandora:sp_web_archive|OBJ\nislandora:sp_disk_image|OBJ\nislandora:pageCModel|OBJ\nislandora:bookCModel|PDF\nislandora:newspaperCModel|PDF');
+
+  module_load_include('inc', 'islandora_usage_stats_callbacks', 'includes/utilities');
+  $default_dsids = islandora_usage_stats_callbacks_set_default_dsids();
+
+  $dsids = variable_get(islandora_usage_stats_callbacks_cmodel_dsids, $default_dsids);
   $cmodel_dsids = array();
 
   // Convert configured DSIDs into an array
