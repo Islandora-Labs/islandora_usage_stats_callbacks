@@ -11,7 +11,9 @@
  *   The default DSID assignments
  */
 function islandora_usage_stats_callbacks_set_default_dsids() {
-  $default_dsids = "ir:citationCModel|PDF\nir:thesisCModel|PDF\nislandora:sp_pdf|OBJ
+  $default_dsids = "ir:citationCModel|PDF
+ir:thesisCModel|PDF
+islandora:sp_pdf|OBJ
 islandora:sp_basic_image|OBJ
 islandora:sp_large_image_cmodel|OBJ
 islandora:binaryObjectCModel|OBJ
