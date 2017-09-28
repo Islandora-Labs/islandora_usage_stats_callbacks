@@ -105,12 +105,11 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
 
   module_load_include('inc', 'islandora_usage_stats_callbacks', 'includes/utilities');
   $default_dsids = islandora_usage_stats_callbacks_set_default_dsids();
-
   $dsids = variable_get(islandora_usage_stats_callbacks_cmodel_dsids, $default_dsids);
   $cmodel_dsids = array();
 
   // Convert configured DSIDs into an array
-  foreach (explode('\n', $dsids) as $pair) {
+  foreach (explode("\n", $dsids) as $pair) {
     $dsid = explode('|', $pair);
     $cmodel_dsids[$dsid[0]] = $dsid[1];
   }
