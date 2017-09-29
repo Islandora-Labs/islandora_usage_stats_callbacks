@@ -76,4 +76,5 @@ function islandora_usage_stats_callbacks_admin_form_submit($form, &$form_state) 
   else {
     drupal_set_message("No file exists at '{$form_state['values']['islandora_usage_stats_callbacks_legacy_stats_file_location']}'", 'error');
   }
+  variable_set('islandora_usage_stats_callbacks_cmodel_dsids', $form_state['values']['islandora_usage_stats_callbacks_cmodel_dsids']);
 }
