@@ -50,7 +50,7 @@ function islandora_usage_stats_callbacks_get_object_stats($pid) {
   $report['legacy-views'] = $legacy_stats['views'];
   $report['legacy-downloads'] = $legacy_stats['downloads'];
   $report['views'] = islandora_usage_stats_callbacks_get_object_views($ids);
-  $report['downloads'] = islandora_usage_stats_callbacks_get_object_downloads($ids);
+  $report['downloads'] = isset($ids['dsid']) ? islandora_usage_stats_callbacks_get_object_downloads($ids) : FALSE;
   echo json_encode($report);
   drupal_exit();
 }
@@ -102,17 +102,20 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
   $ids = array();
   $ids['pid'] = $pid;
   $ids['cmodel'] = islandora_object_load($pid)->models[0];
-  $cmodel_dsids = array('ir:citationCModel' => 'PDF',
-                        'ir:thesisCModel' => 'PDF',
-                        'islandora:sp_pdf' => 'OBJ',
-                        'islandora:sp_basic_image' => 'OBJ',
-                        'islandora:sp_large_image_cmodel' => 'OBJ',
-                        'islandora:binaryObjectCModel' => 'OBJ',
-                        'islandora:sp_videoCModel' => 'MP4',
-                        'islandora:sp-audioCModel' => 'PROXY_MP3',
-                        'islandora:bookCModel' => 'MODS', // Hack to make book views readable
-                        'islandora:newspaperCModel' => 'MODS'); // ditto
- 
+
+  module_load_include('inc', 'islandora_usage_stats_callbacks', 'includes/utilities');
+  $default_dsids = islandora_usage_stats_callbacks_set_default_dsids();
+  $dsids = variable_get(islandora_usage_stats_callbacks_cmodel_dsids, $default_dsids);
+  $cmodel_dsids = array();
+  $rows = array();
+
+  // Convert configured DSIDs into an array
+  $rows = preg_split("/\\r\\n|\\r|\\n/", $dsids);
+  foreach ($rows as $pair) {
+    $rows = explode('|', $pair);
+    $cmodel_dsids[$rows[0]] = $rows[1];
+  }
+
   if ($ids['cmodel'] == '') {
     echo json_encode(array('error' => "PID '${ids['pid']}' does not exist")); 
     drupal_exit();
