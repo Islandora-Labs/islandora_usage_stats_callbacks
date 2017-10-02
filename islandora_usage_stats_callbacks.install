@@ -9,5 +9,9 @@
  * Implements hook_uninstall().
  */
 function islandora_usage_stats_callbacks_uninstall() {
-  variable_del('islandora_usage_stats_callbacks_legacy_stats_file_location');
+  $vars = array(
+    'islandora_usage_stats_callbacks_cmodel_dsids',
+    'islandora_usage_stats_callbacks_legacy_stats_file_location',
+  );
+  array_walk($vars, 'variable_del');
 }
