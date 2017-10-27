@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Primary hook implementations.
+ */
+
 
 /**
  * Implements hook_menu().
@@ -7,7 +12,7 @@
 function islandora_usage_stats_callbacks_menu() {
   $items = array();
 
-  $items['islandora_usage_stats_callbacks/object_stats/%'] = array (
+  $items['islandora_usage_stats_callbacks/object_stats/%'] = array(
     'page callback' => 'islandora_usage_stats_callbacks_get_object_stats',
     'page arguments' => array(2),
     'access callback' => TRUE,
@@ -39,7 +44,7 @@ function islandora_usage_stats_callbacks_permission() {
 
 
 /**
- * Callback functions
+ * Callback functions.
  */
 function islandora_usage_stats_callbacks_get_object_stats($pid) {
   $report = array();
@@ -56,12 +61,11 @@ function islandora_usage_stats_callbacks_get_object_stats($pid) {
 }
 
 /**
- * Legacy stats reader
+ * Legacy stats reader.
  */
 function islandora_usage_stats_callbacks_get_legacy_stats($pid) {
   $legacy_stats = array();
-  //$legacy_stats_file_loc = $_SERVER['DOCUMENT_ROOT'] . "/" . drupal_get_path('module', 'islandora_usage_stats_callbacks') . "/legacy-stats.csv";
-  $legacy_stats_file_loc = variable_get('islandora_usage_stats_callbacks_legacy_stats_file_location', ''); 
+  $legacy_stats_file_loc = variable_get('islandora_usage_stats_callbacks_legacy_stats_file_location', '');
   if (($legacy_stats_file_loc != '') && file_exists($legacy_stats_file_loc)) {
     $legacy_data = array();
     $legacy_data_csv = array_map('str_getcsv', file($legacy_stats_file_loc));
@@ -73,7 +77,7 @@ function islandora_usage_stats_callbacks_get_legacy_stats($pid) {
     }
     if (array_key_exists($pid, $legacy_data)) {
       $legacy_stats['views'] = intval($legacy_data[$pid]['legacy-views']);
-      $legacy_stats['downloads'] = intval($legacy_data[$pid]['legacy-downloads']); 
+      $legacy_stats['downloads'] = intval($legacy_data[$pid]['legacy-downloads']);
     }
     else {
       $legacy_stats['views'] = 0;
@@ -88,14 +92,14 @@ function islandora_usage_stats_callbacks_get_legacy_stats($pid) {
 }
 
 /**
- * DB parsing helper functions
+ * Gets Usage Stats object ID.
  */
 function islandora_usage_stats_callbacks_get_object_ids($pid) {
 
-  # Check PID string format before proceeding 
+  // Check PID string format before proceeding.
   module_load_include('inc', 'islandora', 'includes/utilities');
   if (!islandora_is_valid_pid($pid)) {
-    echo json_encode(array('error' => "PID '${pid}' is not a valid PID string")); 
+    echo json_encode(array('error' => "PID '${pid}' is not a valid PID string"));
     drupal_exit();
   }
 
@@ -109,7 +113,7 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
   $cmodel_dsids = array();
   $rows = array();
 
-  // Convert configured DSIDs into an array
+  // Convert configured DSIDs into an array.
   $rows = preg_split("/\\r\\n|\\r|\\n/", $dsids);
   foreach ($rows as $pair) {
     $rows = explode('|', $pair);
@@ -117,11 +121,11 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
   }
 
   if ($ids['cmodel'] == '') {
-    echo json_encode(array('error' => "PID '${ids['pid']}' does not exist")); 
+    echo json_encode(array('error' => "PID '${ids['pid']}' does not exist"));
     drupal_exit();
   }
   elseif (!in_array($ids['cmodel'], array_keys($cmodel_dsids))) {
-    echo json_encode(array('error' => "unsupported content model '${ids['cmodel']}'")); 
+    echo json_encode(array('error' => "unsupported content model '${ids['cmodel']}'"));
     drupal_exit();
   }
   $ids['dsid'] = $cmodel_dsids[$ids['cmodel']];
@@ -132,16 +136,22 @@ function islandora_usage_stats_callbacks_get_object_ids($pid) {
   $record = $result->fetchAssoc();
   $ids['usid'] = $record['id'];
   if ($ids['usid'] == '') {
-    echo json_encode(array('pid' => $ids['pid'], 'cmodel' => $ids['cmodel'], 'views' => array(), 'downloads' => array()));
+    echo json_encode(array(
+      'pid' => $ids['pid'],
+      'cmodel' => $ids['cmodel'],
+      'views' => array(),
+      'downloads' => array(),
+    ));
     drupal_exit();
-  } 
+  }
   return $ids;
 }
 
+/**
+ * Gets Usage Stats object views.
+ */
 function islandora_usage_stats_callbacks_get_object_views($ids) {
   $result = db_select('islandora_usage_stats_object_access_log')
-    # IP address temporarily disabled for security reasons
-    #->fields('islandora_usage_stats_object_access_log', array('time', 'ip'))
     ->fields('islandora_usage_stats_object_access_log', array('time'))
     ->condition('pid_id', $ids['usid'])
     ->execute();
@@ -149,6 +159,9 @@ function islandora_usage_stats_callbacks_get_object_views($ids) {
   return $record;
 }
 
+/**
+ * Gets Usage Stats object downloads.
+ */
 function islandora_usage_stats_callbacks_get_object_downloads($ids) {
   $ds_check_query = db_select('islandora_usage_stats_datastreams')
     ->fields('islandora_usage_stats_datastreams', array('id'))
@@ -158,8 +171,6 @@ function islandora_usage_stats_callbacks_get_object_downloads($ids) {
   $ds_check_result = $ds_check_query->fetchAssoc();
   if ($ds_check_result['id']) {
     $result = db_select('islandora_usage_stats_object_ds_access_log')
-      # IP address temporarily disabled for security reasons
-      #->fields('islandora_usage_stats_object_ds_access_log', array('time', 'ip'))
       ->fields('islandora_usage_stats_object_ds_access_log', array('time'))
       ->condition('ds_id', $ds_check_result['id'])
       ->execute();

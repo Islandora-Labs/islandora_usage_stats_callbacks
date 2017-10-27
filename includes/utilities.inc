@@ -5,13 +5,15 @@
  * Utility functions.
  */
 
-/* Set the default CModel and DSID assignments.
+/**
+ * Set the default CModel and DSID assignments.
  *
  * @return string
  *   The default DSID assignments
  */
 function islandora_usage_stats_callbacks_set_default_dsids() {
-  $default_dsids = "ir:citationCModel|PDF
+  $default_dsids = <<<CMODELS
+ir:citationCModel|PDF
 ir:thesisCModel|PDF
 islandora:sp_pdf|OBJ
 islandora:sp_basic_image|OBJ
@@ -26,6 +28,8 @@ islandora:newspaperPageCModel|OBJ
 islandora:sp_web_archive|OBJ
 islandora:sp_disk_image|OBJ
 islandora:pageCModel|OBJ
-islandora:bookCModel|PDF\nislandora:newspaperCModel|PDF";
+islandora:bookCModel|PDF
+islandora:newspaperCModel|PDF
+CMODELS;
   return $default_dsids;
 }
