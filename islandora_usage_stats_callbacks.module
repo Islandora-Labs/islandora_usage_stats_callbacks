@@ -15,7 +15,7 @@ function islandora_usage_stats_callbacks_menu() {
   $items['islandora_usage_stats_callbacks/object_stats/%'] = array(
     'page callback' => 'islandora_usage_stats_callbacks_get_object_stats',
     'page arguments' => array(2),
-    'access callback' => TRUE,
+    'access callback' => array('access usage stats callbacks api'),
   );
 
   $items['admin/islandora/tools/islandora_usage_stats_callbacks'] = array(
@@ -38,6 +38,10 @@ function islandora_usage_stats_callbacks_permission() {
     'manage usage stats callbacks' => array(
       'title' => 'Manage usage stats callbacks configuration',
       'description' => 'Manage the configuration of the Usage Stats Callbacks module',
+    ),
+    'access usage stats callbacks api' => array(
+      'title' => t('Access callbacks API'),
+      'description' => t('Access Islandora Usage Stats callbacks API'),
     ),
   );
 }
