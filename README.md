@@ -14,7 +14,14 @@ This module requires the following modules/libraries:
 Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
 
 ## Configuration
-Islandora Usage Stats Callbacks currently requires no configuration. The API becomes accessible when the module is enabled.
+Islandora Usage Stats Callbacks currently requires permssions to be set. This is only set for __admin__ by default. The API becomes accessible when the module is enabled.
+
+This will make it available for all user roles including anonymous.
+```terminal
+# Grant permissions for everyone to see the download count
+/var/www/drupal$ drush role-add-perm 'anonymous user' 'access usage stats callbacks api'
+/var/www/drupal$ drush role-add-perm 'authenticated user' 'access usage stats callbacks api'
+```
 
 ## Usage
 The Islandora Usage Stats Callback API uses the following pattern:  
@@ -45,6 +52,48 @@ The current API only supports one report type, `object_stats`, which returns the
 }
 ```
 The **object_stats** report type was created to meet requirements from  FSU Libraries for an externally accessible API for retrieving views/downloads for an object via pid in order to create email readership reports for faculty with objects in the FSU Research Repository.
+
+### To display on the object's page from the theme's template.php file.
+This is an example of how to apply this to your site without having to create a new .tpl file or any major theme modifications. This is an example of how to appends the view & downloads count to your existing content.
+```php
+// from within your theme's preprocess page function
+function yourThemeName_preprocess_page(&$variables, $hook) {
+
+  // Includes needed module functions
+  module_load_include('inc', 'islandora', 'includes/utilities');
+
+  // Retrieve the object (PID from the URL)
+  $parsed_request = explode('/', $_SERVER['REQUEST_URI']);
+
+  // PID check to see if this is an object or not
+  if (islandora_is_valid_pid(urldecode(end($parsed_request)))) {
+    $variables['page']['islandora_object'] = islandora_object_load(urldecode(end($parsed_request)));
+    
+   // Check if the valid PID is not a collection
+    if(!isset($variables['page']['islandora_object']['COLLECTION_POLICY']))
+    {
+      $islandora_object = $variables['page']['islandora_object'];
+      // checks if modules is installed and if user has api access
+      if (module_exists('islandora_usage_stats_callbacks') && user_access('access usage stats callbacks api')) {
+        global $base_url;
+        // grabs the download and view count
+        $usage_stats_json = file_get_contents("{$base_url}/islandora_usage_stats_callbacks/object_stats/{$islandora_object->id}");
+        $usage_stats_array = json_decode($usage_stats_json, TRUE);
+        $views = count($usage_stats_array['views']) + $usage_stats_array['legacy-views'];
+        $downloads = count($usage_stats_array['downloads']) + $usage_stats_array['legacy-downloads'];
+        $usage_data = array('views' => $views, 'downloads' => $downloads);
+        // places strings within page level variables for parcing (optional)
+        $variables['page']['object_cmodel'] = $usage_stats_array['cmodel'];
+        $variables['page']['usage_views'] = $usage_data['views'];
+        $variables['page']['usage_downloads'] = $usage_data['downloads'];
+        // Builds the string to append to the content 
+        $string_something = '<div id="usage-stats-box"><span class="usage-stats-views">' . $usage_data['views'] . ' views</span><br><span class="usage-stats-downloads">' . $usage_data['downloads'] . ' downloads</span></div>';
+        $variables['page']['content']['system_main']['citation.tab']['pdf_download']['#suffix'] = $string_something;
+      }
+    }
+  }
+}
+```
 
 ## Troubleshooting/Issues
 If you are having problems with Islandora Usage Stats Callbacks, please contact Bryan J. Brown (bjbrown@fsu.edu).
