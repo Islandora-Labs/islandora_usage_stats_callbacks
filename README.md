@@ -54,6 +54,7 @@ The current API only supports one report type, `object_stats`, which returns the
 The **object_stats** report type was created to meet requirements from  FSU Libraries for an externally accessible API for retrieving views/downloads for an object via pid in order to create email readership reports for faculty with objects in the FSU Research Repository.
 
 ### To display on the object's page from the theme's template.php file.
+This is an example of how to apply this to your site without having to create a new .tpl file or any major theme modifications. This is an example of how to appends the view & downloads count to your existing content.
 ```php
 // from within your theme's preprocess page function
 function yourThemeName_preprocess_page(&$variables, $hook) {
